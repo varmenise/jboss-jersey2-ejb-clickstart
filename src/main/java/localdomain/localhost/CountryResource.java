@@ -64,7 +64,8 @@ public class CountryResource {
 	 * class EJBProvider) with the specified name (in this case
 	 * CountryRepository).
 	 */
-	@EJB(mappedName = "java:module/CountryRepository")
+	@EJBProvider
+	//(mappedName = "java:module/CountryRepository")
 	private CountryRepository countryRepository;
 
 	@Path("/")

@@ -20,12 +20,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.core.Application;
 
+import org.glassfish.hk2.api.DynamicConfiguration;
 import org.glassfish.hk2.api.InjectionResolver;
+import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.api.TypeLiteral;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.glassfish.jersey.internal.inject.Injections;
 import org.glassfish.jersey.server.ResourceConfig;
 
 /**
@@ -34,27 +38,58 @@ import org.glassfish.jersey.server.ResourceConfig;
  * 
  * @author valentina armenise
  */
+
 @Stateless
-public class MyApplication extends ResourceConfig {
+public class MyApplication extends Application {
 
-	public MyApplication() {
 
-		//packages("localdomain.localhost.CountryResource");
+	public MyApplication(ServiceLocator serviceLocator) {
+		DynamicConfiguration dc = Injections.getConfiguration(serviceLocator);
 
-		// register(new EJBProvider());
-		register(new AbstractBinder() {
-            @Override
-            protected void configure() {
-                //bindFactory(EJBFactory.class).to(CountryRepository.class);
-            	bind(EJBFactory.class).to(CountryRepository.class);
-            	bind(EJBInjectResolver.class)
-                    .to(new TypeLiteral<InjectionResolver<EJBProvider>>(){})
-                    .in(Singleton.class);
-            }
-        });
-
+		Injections.addBinding(Injections.newBinder((EJBFactory.class)).to(CountryRepository.class),dc);
+		// singleton binding
+		Injections.addBinding(
+				Injections.newBinder(EJBInjectResolver.class)
+				.to(new TypeLiteral<InjectionResolver<EJBProvider>>(){})
+				.in(Singleton.class),
+				dc);
+		dc.commit();
 	}
 
+	public MyApplication() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public Set<Class<?>> getClasses() {
+		Set<Class<?>> s = new HashSet<Class<?>>();
+		//s.add(EJBProvider.class);
+		s.add(CountryResource.class);
+		return s;
+	}
 }
+//@Stateless
+//public class MyApplication extends ResourceConfig {
+//
+//	public MyApplication() {
+//
+//		//packages("localdomain.localhost.CountryResource");
+//
+//		// register(new EJBProvider());
+////		register(new AbstractBinder() {
+////            @Override
+////            protected void configure() {
+////                //bindFactory(EJBFactory.class).to(CountryRepository.class);
+////            	bind(EJBFactory.class).to(CountryRepository.class);
+////            	bind(EJBInjectResolver.class)
+////                    .to(new TypeLiteral<InjectionResolver<EJBProvider>>(){})
+////                    .in(Singleton.class);
+////            }
+////        });
+//
+//	}
+//
+//}
 
 
